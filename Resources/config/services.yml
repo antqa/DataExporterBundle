@@ -1,7 +1,12 @@
 parameters:
-    ee.dataexporter.class: EE\DataExporterBundle\Service\DataExporter
+    antqa.dataexporter.class: AntQa\Bundle\DataExporterBundle\Service\DataExporter
 
 services:
-    ee.dataexporter:
-        class: %ee.dataexporter.class%
+    antqa.dataexporter:
+        class: %antqa.dataexporter.class%
         public: true
+        scope: prototype
+        arguments:
+          - %kernel.bundles%
+          - @templating
+          - @?knp_snappy.pdf

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale }}">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h3>{{ title|raw }}</h3>
+    <p>{{ description|raw }}</p>
+    <table>
+        <thead>
+            <tr>
+                {% for key, name in columns %}
+                    <th>
+                        {{ name }}
+                    </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in data %}
+            <tr>
+                {% for cell in row %}
+                    <td>
+                        {{ cell }}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

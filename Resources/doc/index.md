@@ -1,18 +1,18 @@
-EEDataExporter
+AntQaDataExporterBundle
 -------------
 
-[![Build Status](https://api.travis-ci.org/Antek88/DataExporter.png?branch=master)](http://travis-ci.org/Antek88/DataExporter)
+[![Build Status](https://api.travis-ci.org/piotrantosik/DataExporter.png?branch=master)](http://travis-ci.org/piotrantosik/DataExporter)
 
 ## BC Break from 1.0
 - skip_header and memory options must be a boolean
 
 ## Installation
 
-### Download EEDataexporterBundle using composer
+### Download AntQaDataExporterBundle using composer
 ```js
 {
     "require": {
-        "ee/dataexporter-bundle": "*"
+        "piotrantosik/dataexporter-bundle": "*"
     }
 }
 ```
@@ -22,7 +22,7 @@ public function registerBundles()
 {
     $bundles = array(
         // ...
-        new EE\DataExporterBundle\EEDataExporterBundle(),
+        new AntQa\DataExporterBundle\AntQaDataExporterBundle(),
     );
 }
 ```
@@ -42,7 +42,7 @@ col1 is equals with $object->getCol1(), hasCol1(), isCol1(), $object->col1 or ma
 
 ### Render to memory
 Maybe sometime you a need render data to variable.
-EEDataExporter support this. You must set parameter `memory` into setOption eg.:
+AntQaDataExporterBundle support this. You must set parameter `memory` into setOption eg.:
 ```php
 $exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';', 'memory' => true));
 //set data...
@@ -65,7 +65,7 @@ $exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 
 $exporter->addHook(array(&$this, 'hookTest2'), '[col3]');
 ```
 
- - EEDataExporter support closure as parameter eg.:
+ - AntQaDataExporterBundle support closure as parameter eg.:
 ```php
 $f = function($parm){
         if ($parm instanceof \DateTime) {

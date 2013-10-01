@@ -1,6 +1,6 @@
 <?php
 
-namespace EE\DataExporterBundle\DependencyInjection;
+namespace AntQa\Bundle\DataExporterBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;

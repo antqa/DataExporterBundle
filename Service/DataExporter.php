@@ -1,16 +1,23 @@
 <?php
 
-namespace EE\DataExporterBundle\Service;
+namespace AntQa\Bundle\DataExporterBundle\Service;
 
+use Knp\Bundle\SnappyBundle\Snappy\LoggableGenerator;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\OptionsResolver\Options;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\Templating\EngineInterface;
 
 /**
- * DataExporter class
+ * DataExporter
  *
  * @author  Piotr Antosik <mail@piotrantosik.com>
- * @version Release: 0.4.3
+ * @version Release: 0.5
+ *
+ * TODO: /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/ jako kluczi  przechodzi 2014-02-14
  */
 class DataExporter
 {
@@ -25,81 +32,55 @@ class DataExporter
     protected $data;
 
     /**
-     * @var string
-     */
-    protected $format;
-
-    /**
-     * @var string
-     */
-    protected $separator;
-
-    /**
-     * @var string
-     */
-    protected $escape;
-
-    /**
-     * @var string
-     */
-    protected $fileName;
-
-    /**
-     * @var boolean
-     */
-    protected $memory = false;
-
-    /**
-     * @var boolean
-     */
-    protected $skipHeader = false;
-
-    /**
-     * @var boolean
-     */
-    protected $allowNull = false;
-
-    /**
-     * @var string
-     */
-    protected $nullReplace = '-';
-
-    /**
-     * @var string
-     */
-    protected $charset;
-
-    /**
-     * @var array
-     */
-    protected $supportedFormat = array('csv', 'xls', 'html', 'xml', 'json');
-
-    /**
      * @var array
      */
     protected $hooks = array();
 
     /**
-     * @param string $format
-     * @param array  $options
-     *
-     * @return $this
-     * @throws \RuntimeException
+     * @var array
      */
-    public function setOptions($format, $options = array())
+    protected $options;
+
+    /**
+     * @var array
+     */
+    protected $registredBundles;
+
+    /**
+     * @var LoggableGenerator|null
+     */
+    protected $knpSnappyPdf;
+
+    /**
+     * @var EngineInterface
+     */
+    protected $templating;
+
+    /**
+     * @param array                  $registredBundles
+     * @param EngineInterface        $templating
+     * @param null $knpSnappyPdf
+     */
+    public function __construct($registredBundles, EngineInterface $templating, LoggableGenerator $knpSnappyPdf = null)
     {
-        if (false === in_array(strtolower($format), $this->supportedFormat)) {
-            throw new \RuntimeException(sprintf('The format %s is not supported', $format));
-        }
+        $this->registredBundles = $registredBundles;
+        $this->templating = $templating;
+        $this->knpSnappyPdf = $knpSnappyPdf;
+    }
 
-        $this->format = strtolower($format);
-        $this->charset = isset($options['charset']) ? $options['charset'] : 'utf-8';
+    /**
+     * @param array $options
+     *
+     * @throws \Exception
+     */
+    public function setOptions($options = array())
+    {
+        $resolver = new OptionsResolver();
+        $this->setDefaultOptions($resolver);
+        $this->options = $resolver->resolve($options);
 
-        switch ($this->format) {
+        switch ($this->getFormat()) {
             case 'csv':
-                //options for csv
-                array_key_exists('separator', $options) ? $this->separator = $options['separator'] : $this->separator = ',';
-                array_key_exists('escape', $options) ? $this->escape = $options['escape'] : '\\';
                 $this->data = array();
                 break;
             case 'xls':
@@ -111,43 +92,187 @@ class DataExporter
             case 'xml':
                 $this->openXML();
                 break;
+            case 'pdf':
+                if (false === array_key_exists('KnpSnappyBundle', $this->registredBundles)) {
+                    throw new \Exception('KnpSnappyBundle must be installed');
+                }
+
+                break;
         }
 
-        //convert key to lowercase
-        $options = array_change_key_case($options, CASE_LOWER);
-
-        //fileName
-        if (true === array_key_exists('filename', $options)) {
-            $this->fileName = $options['filename'] . '.' . $this->format;
-            unset($options['filename']);
-        } else {
-            $this->fileName = 'Data export' . '.' . $this->format;
+        if (true === $this->getSkipHeader() && $this->getFormat() !== 'csv') {
+            throw new \Exception('Only CSV support skip_header option!');
         }
+    }
 
-        //memory option
-        if (true === array_key_exists('memory', $options) && true === $options['memory']) {
-            $this->memory = true;
-        }
+    protected function setDefaultOptions(OptionsResolverInterface $resolver)
+    {
+        $resolver->setDefaults(array(
+                'format' => 'csv',
+                'charset'=> 'utf-8',
+                'fileName' => function (Options $options) {
+                        $date = new \DateTime();
 
-        //skip header
-        if (true === array_key_exists('skip_header', $options) && true === $options['skip_header']) {
-            $this->skipHeader = true;
-        }
+                        return sprintf('Data export %s.%s', $date->format('Y-m-d H:i:s'), $options['format']);
+                    },
+                'memory' => false,
+                'skipHeader' => false,
+                'allowNull' => false,
+                'nullReplace' => false,
+                'separator' => function (Options $options) {
+                        if ('csv' === $options['format']) {
+                            return ',';
+                        }
 
-        if (true === $this->skipHeader && $this->format !== 'csv') {
-            throw new \RuntimeException('Only CSV support skip_header option!');
-        }
+                        return null;
+                    },
+                'escape' => function (Options $options) {
+                        if ('csv' === $options['format']) {
+                            return '\\';
+                        }
 
-        //allow null data
-        if (true === array_key_exists('allow_null', $options) && true === $options['allow_null']) {
-            $this->allowNull = true;
+                        return null;
+                    },
+                'onlyContent' => function(Options $options) {
+                        if ('html' === $options['format']) {
+                            return false;
+                        }
 
-            if (true === array_key_exists('null_replace', $options)) {
-                $this->nullReplace = $options['null_replace'];
-            }
-        }
+                        return null;
+                    },
+                'template' => function (Options $options) {
+                        if ('pdf' === $options['format'] || 'render' === $options['format']) {
+                            return 'AntQaDataExporterBundle::base.pdf.twig';
+                        }
 
-        return $this;
+                        return null;
+                    },
+                'template_vars' => array(),
+                'pdfOptions' => function (Options $options) {
+                        if ('pdf' === $options['format']) {
+                            return array(
+                                'orientation' => 'Landscape'
+                            );
+                        }
+
+                        return null;
+                    }
+            ));
+        $resolver->setAllowedValues(array(
+                'format' => array('csv', 'xls', 'html', 'xml', 'json', 'pdf', 'listData', 'render')
+            ));
+        $resolver->setAllowedTypes(array(
+                'charset' => 'string',
+                'fileName' => 'string',
+                'memory' => array('null', 'bool'),
+                'skipHeader' => array('null', 'bool'),
+                'separator' => array('null', 'string'),
+                'escape' => array('null', 'string'),
+                'allowNull' => 'bool',
+                'nullReplace' => 'bool',
+                'template' => array('null', 'string'),
+                'template_vars' => 'array',
+                'pdfOptions' => array('null', 'array'),
+                'onlyContent' => array('null', 'bool')
+            ));
+    }
+
+    /**
+     * @return string
+     */
+    private function getFormat()
+    {
+        return $this->options['format'];
+    }
+
+    /**
+     * @return Boolean|null
+     */
+    private function getInMemory()
+    {
+        return $this->options['memory'];
+    }
+
+    /**
+     * @return string
+     */
+    private function getFileName()
+    {
+        return $this->options['fileName'];
+    }
+
+    /**
+     * @return Boolean|null
+     */
+    private function getSkipHeader()
+    {
+        return $this->options['skipHeader'];
+    }
+
+    /**
+     * @return Boolean|null
+     */
+    private function getOnlyContent()
+    {
+        return $this->options['onlyContent'];
+    }
+
+    /**
+     * @return string|null
+     */
+    private function getTemplate()
+    {
+        return $this->options['template'];
+    }
+
+    /**
+     * @return array
+     */
+    private function getTemplateVars()
+    {
+        return $this->options['template_vars'];
+    }
+
+    /**
+     * @return array|null
+     */
+    private function getPdfOptions()
+    {
+        return $this->options['pdfOptions'];
+    }
+
+    /**
+     * @return string
+     */
+    private function getCharset()
+    {
+        return $this->options['charset'];
+    }
+
+    /**
+     * @return string
+     */
+    private function getSeparator()
+    {
+        return $this->options['separator'];
+    }
+
+    /**
+     * @return string
+     */
+    private function getEscape()
+    {
+        return $this->options['escape'];
+    }
+
+    private function getAllowNull()
+    {
+        return $this->options['allowNull'];
+    }
+
+    private function getNullReplace()
+    {
+        return $this->options['nullReplace'];
     }
 
     /**
@@ -155,7 +280,7 @@ class DataExporter
      */
     private function openXML()
     {
-        $this->data = '<?xml version="1.0" encoding="' . $this->charset . '"?><table>';
+        $this->data = '<?xml version="1.0" encoding="' . $this->getCharset() . '"?><table>';
 
         return $this;
     }
@@ -175,7 +300,7 @@ class DataExporter
      */
     private function openXLS()
     {
-        $this->data = "<!DOCTYPE ><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=" . $this->charset . "\" /><meta name=\"ProgId\" content=\"Excel.Sheet\"><meta name=\"Generator\" content=\"https://github.com/EE/DataExporter\"></head><body><table>";
+        $this->data = sprintf("<!DOCTYPE ><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\" /><meta name=\"ProgId\" content=\"Excel.Sheet\"><meta name=\"Generator\" content=\"https://github.com/piotrantosik/DataExporter\"></head><body><table>", $this->getCharset());
 
         return $this;
     }
@@ -195,7 +320,11 @@ class DataExporter
      */
     private function openHTML()
     {
-        $this->data = "<!DOCTYPE ><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=" . $this->charset . "\" /><meta name=\"Generator\" content=\"https://github.com/EE/DataExporter\"></head><body><table>";
+        if (!$this->getOnlyContent()) {
+            $this->data = "<!DOCTYPE ><html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=" . $this->getCharset() . "\" /><meta name=\"Generator\" content=\"https://github.com/piotrantosik/DataExporter\"></head><body><table>";
+        } else {
+            $this->data = '<table>';
+        }
 
         return $this;
     }
@@ -205,7 +334,11 @@ class DataExporter
      */
     private function closeHTML()
     {
-        $this->data .= "</table></body></html>";
+        if (!$this->getOnlyContent()) {
+            $this->data .= "</table></body></html>";
+        } else {
+            $this->data .= "</table>";
+        }
 
         return $this;
     }
@@ -228,12 +361,16 @@ class DataExporter
             if (false === is_array($hooks[$column])) {
                 $data = $hooks[$column]($data);
             } else {
+                $refl = new \ReflectionMethod($hooks[$column][0], $hooks[$column][1]);
                 if (is_object($hooks[$column][0])) {
                     $obj = $hooks[$column][0];
+                    $data = $obj->$hooks[$column][1]($data);
+                } elseif ($refl->isStatic()) {
+                    $data = $hooks[$column][0]::$hooks[$column][1]($data);
                 } else {
                     $obj = new $hooks[$column][0];
+                    $data = $obj->$hooks[$column][1]($data);
                 }
-                $data = $obj->$hooks[$column][1]($data);
             }
         }
 
@@ -253,7 +390,10 @@ class DataExporter
                 $data = htmlspecialchars($data);
             }
         }
-
+        //strip html tags
+        if (in_array($format, array('csv', 'xls'))) {
+            $data = strip_tags($data);
+        }
 
         return $data;
     }
@@ -282,6 +422,8 @@ class DataExporter
                 throw new \LengthException('Exactly two parameters required!');
             }
 
+            /*
+             * bug: use addHook before setColumns
             if (false === in_array($column, $this->columns)) {
                 throw new \InvalidArgumentException(sprintf(
                     "Parameter column must be defined in setColumns function!\nRecived: %s\n Expected one of: %s",
@@ -289,7 +431,7 @@ class DataExporter
                     implode(', ', $this->columns)
                 ));
             }
-
+            */
             if (false === is_callable($function)) {
                 throw new \BadFunctionCallException(sprintf(
                     'Function %s in class %s is non callable!',
@@ -311,12 +453,12 @@ class DataExporter
      */
     private function addRow($row)
     {
-        $separator = $this->separator;
-        $escape = $this->escape;
+        $separator = $this->getSeparator();
+        $escape = $this->getEscape();
         $hooks = $this->hooks;
-        $format = $this->format;
-        $allowNull = $this->allowNull;
-        $nullReplace = $this->nullReplace;
+        $format = $this->getFormat();
+        $allowNull = $this->getAllowNull();
+        $nullReplace = $this->getNullReplace();
 
         $tempRow = array_map(
             function ($column) use ($row, $separator, $escape, $hooks, $format, $allowNull, $nullReplace) {
@@ -342,12 +484,17 @@ class DataExporter
             $this->columns
         );
 
-        switch ($this->format) {
+        switch ($this->getFormat()) {
             case 'csv':
-                $this->data[] = implode($this->separator, $tempRow);
+                $this->data[] = implode($this->getSeparator(), $tempRow);
                 break;
             case 'json':
                 $this->data[] = array_combine($this->data[0], $tempRow);
+                break;
+            case 'pdf':
+            case 'listData':
+            case 'render':
+                $this->data[] = $tempRow;
                 break;
             case 'xls':
             case 'html':
@@ -379,9 +526,6 @@ class DataExporter
      */
     public function setData($rows)
     {
-        if (empty($this->format)) {
-            throw new \RuntimeException('First use setOptions!');
-        }
         if (empty($this->columns)) {
             throw new \RuntimeException('First use setColumns to set columns to export!');
         }
@@ -401,7 +545,7 @@ class DataExporter
      */
     private function closeData()
     {
-        switch ($this->format) {
+        switch ($this->getFormat()) {
             case 'json':
                 //remove first row from data
                 unset($this->data[0]);
@@ -459,19 +603,23 @@ class DataExporter
             $this->columns[] = $key;
         }
 
-        if ('csv' === $this->format && false === $this->skipHeader) {
+        if (in_array($this->getFormat(), array('csv', 'json', 'xls'))) {
+            $column = strip_tags($column);
+        }
+
+        if ('csv' === $this->getFormat() && false === $this->getSkipHeader()) {
             //last item
             if (isset($this->data[0])) {
                 //last item
                 if ($key != $this->getLastKeyFromArray($columns)) {
-                    $this->data[0] = $this->data[0] . $column . $this->separator;
+                    $this->data[0] = $this->data[0] . $column . $this->getSeparator();
                 } else {
                     $this->data[0] = $this->data[0] . $column;
                 }
             } else {
-                $this->data[] = $column . $this->separator;
+                $this->data[] = $column . $this->getSeparator();
             }
-        } elseif (true === in_array($this->format, array('xls', 'html'))) {
+        } elseif (true === in_array($this->getFormat(), array('xls', 'html'))) {
             //first item
             if ($key === $this->getFirstKeyFromArray($columns)) {
                 $this->data .= '<tr>';
@@ -482,7 +630,11 @@ class DataExporter
             if ($key === $this->getLastKeyFromArray($columns)) {
                 $this->data .= '</tr>';
             }
-        } elseif ('json' === $this->format) {
+        } elseif ('json' === $this->getFormat()) {
+            $this->data[0] = array_values($columns);
+        } elseif ('pdf' === $this->getFormat() || 'render' === $this->getFormat()) {
+            $this->data[0] = array_values($columns);
+        } elseif ('listData' === $this->getFormat()) {
             $this->data[0] = array_values($columns);
         }
 
@@ -495,10 +647,10 @@ class DataExporter
      * @return $this
      * @throws \RuntimeException
      */
-    public function setColumns(Array $columns)
+    public function setColumns(array $columns)
     {
-
-        if (empty($this->format)) {
+        $format = $this->getFormat();
+        if (empty($format)) {
             throw new \RuntimeException(sprintf('First use setOptions!'));
         }
 
@@ -525,7 +677,7 @@ class DataExporter
     {
         $response = new Response;
 
-        switch ($this->format) {
+        switch ($this->getFormat()) {
             case 'csv':
                 $response->headers->set('Content-Type', 'text/csv');
                 $response->setContent($this->prepareCSV());
@@ -548,16 +700,47 @@ class DataExporter
                 $response->headers->set('Content-Type', 'application/xml');
                 $response->setContent($this->data);
                 break;
+            case 'pdf':
+                $columns = $this->data[0];
+                unset($this->data[0]);
+                $response->headers->set('Content-Type', 'application/pdf');
+                $response->setContent(
+                    $this->knpSnappyPdf->getOutputFromHtml(
+                        $this->templating->render($this->getTemplate(), array(
+                                'columns'  => $columns,
+                                'data' => $this->data,
+                                'template_vars' => $this->getTemplateVars()
+                            )),
+                        $this->getPdfOptions()
+                    )
+                );
+                break;
+            case 'render':
+                $columns = $this->data[0];
+                unset($this->data[0]);
+                $response->headers->set('Content-Type', 'text/plain');
+                $response->setContent(
+                    $this->templating->render($this->getTemplate(), array(
+                            'columns'  => $columns,
+                            'data' => $this->data,
+                            'template_vars' => $this->getTemplateVars()
+                        ))
+                );
+                break;
+            case 'listData':
+                $columns = $this->data[0];
+                unset($this->data[0]);
+
+                return array('columns' => $columns, 'rows' => $this->data);
         }
 
-        if ($this->memory) {
+        if ($this->getInMemory()) {
             return $response->getContent();
         }
 
         $response->headers->set('Cache-Control', 'public');
-        $response->headers->set('Content-Disposition', 'attachment; filename="' . $this->fileName . '"');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $this->getFileName() . '"');
 
         return $response;
-
     }
 }

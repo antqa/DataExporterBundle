@@ -1,9 +1,9 @@
 {
-    "name": "ee/dataexporter-bundle",
+    "name": "piotrantosik/dataexporter-bundle",
     "type": "symfony-bundle",
     "description": "Easy export data to CSV, XML, HTML, JSON or XLS",
     "keywords": ["exporter","csv","xls", "xml", "json"],
-    "homepage": "http://laboratorium.ee",
+    "homepage": "http://github.com/piotrantosik/AntQaAjaxAutoCompleteBundle",
     "license": "MIT",
     "authors": [
         {
@@ -18,13 +18,25 @@
         "php": ">=5.3.3",
         "symfony/framework-bundle": "~2.1",
         "symfony/http-foundation": "~2.1",
-        "symfony/property-access": "~2.1"
+        "symfony/property-access": "~2.1",
+        "symfony/options-resolver": "~2.1",
+        "knplabs/knp-snappy-bundle": "~1.0",
+        "symfony/templating": "~2.1"
     },
     "require-dev": {
         "symfony/yaml": "~2.1"
     },
-    "autoload": {
-        "psr-0": { "EE\\DataExporterBundle": "" }
+    "suggest": {
+        "knplabs/knp-snappy-bundle": "To use PDF export",
+        "symfony/templating": "To PDF and render export"
     },
-    "target-dir": "EE/DataExporterBundle"
+    "autoload": {
+        "psr-0": { "AntQa\\Bundle\\DataExporterBundle": "" }
+    },
+    "target-dir": "AntQa/Bundle/DataExporterBundle",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.5.x-dev"
+        }
+    }
 }

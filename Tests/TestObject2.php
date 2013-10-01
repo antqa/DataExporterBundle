@@ -1,6 +1,6 @@
 <?php
 
-namespace EE\DataExporterBundle\Tests;
+namespace AntQa\Bundle\DataExporterBundle\Tests;
 
 class TestObject2
 {
