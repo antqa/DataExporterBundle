@@ -57,15 +57,21 @@ class DataExporter
     protected $templating;
 
     /**
+     * @var \Symfony\Component\PropertyAccess\PropertyAccessor
+     */
+    private $propertyAccessor;
+
+    /**
      * @param array                  $registredBundles
      * @param EngineInterface        $templating
-     * @param null $knpSnappyPdf
+     * @param LoggableGenerator|null $knpSnappyPdf
      */
     public function __construct($registredBundles, EngineInterface $templating, LoggableGenerator $knpSnappyPdf = null)
     {
         $this->registredBundles = $registredBundles;
         $this->templating = $templating;
         $this->knpSnappyPdf = $knpSnappyPdf;
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
 
     /**
@@ -93,7 +99,7 @@ class DataExporter
                 $this->openXML();
                 break;
             case 'pdf':
-                if (false === array_key_exists('KnpSnappyBundle', $this->registredBundles)) {
+                if (false === isset($this->registredBundles['KnpSnappyBundle'])) {
                     throw new \Exception('KnpSnappyBundle must be installed');
                 }
 
@@ -345,18 +351,15 @@ class DataExporter
 
     /**
      * @param string $data
-     * @param string $separator
-     * @param string $escape
      * @param string $column
-     * @param array  $hooks
-     * @param string $format
      *
      * @return string
      */
-    public static function escape($data, $separator, $escape, $column, $hooks, $format)
+    private function escape(&$data, &$column)
     {
+        $hooks = &$this->hooks;
         //check for hook
-        if (array_key_exists($column, $hooks)) {
+        if (count($hooks) > 0 && isset($hooks[$column])) {
             //check for closure
             if (false === is_array($hooks[$column])) {
                 $data = $hooks[$column]($data);
@@ -378,12 +381,12 @@ class DataExporter
         $data = preg_replace("/\r\n|\r|\n/", ' ', $data);
 
         $data = mb_ereg_replace(
-            sprintf('%s', $separator),
-            sprintf('%s', $escape),
+            sprintf('%s', $this->getSeparator()),
+            sprintf('%s', $this->getEscape()),
             $data
         );
 
-        if ('xml' === $format) {
+        if ('xml' === $this->getFormat()) {
             if (version_compare(phpversion(), '5.4.0', '>=')) {
                 $data = htmlspecialchars($data, ENT_XML1);
             } else {
@@ -391,7 +394,7 @@ class DataExporter
             }
         }
         //strip html tags
-        if (in_array($format, array('csv', 'xls'))) {
+        if (in_array($this->getFormat(), array('csv', 'xls'))) {
             $data = strip_tags($data);
         }
 
@@ -447,54 +450,43 @@ class DataExporter
     }
 
     /**
-     * @param string $row
+     * @param mix $row
      *
      * @return bool
+     *
+     * @throws \Exception
+     * @throws \Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException
      */
-    private function addRow($row)
+    private function addRow(&$row)
     {
-        $separator = $this->getSeparator();
-        $escape = $this->getEscape();
-        $hooks = $this->hooks;
-        $format = $this->getFormat();
-        $allowNull = $this->getAllowNull();
-        $nullReplace = $this->getNullReplace();
+        $countColumns = count($this->columns);
+        $tempRow = new \SplFixedArray($countColumns);
 
-        $tempRow = array_map(
-            function ($column) use ($row, $separator, $escape, $hooks, $format, $allowNull, $nullReplace) {
-                try {
-                    $value = PropertyAccess::createPropertyAccessor()->getValue($row, $column);
-                } catch (UnexpectedTypeException $exception) {
-                    if (true === $allowNull) {
-                        $value = $nullReplace;
-                    } else {
-                        throw $exception;
-                    }
+        for ($i = 0; $i < $countColumns; $i++) {
+            try {
+                $value = $this->propertyAccessor->getValue($row, $this->columns[$i]);
+            } catch (UnexpectedTypeException $exception) {
+                if (true === $this->getAllowNull()) {
+                    $value = $this->getNullReplace();
+                } else {
+                    throw $exception;
                 }
+            }
 
-                return DataExporter::escape(
-                    $value,
-                    $separator,
-                    $escape,
-                    $column,
-                    $hooks,
-                    $format
-                );
-            },
-            $this->columns
-        );
+            $tempRow[$i] = $this->escape($value, $this->columns[$i]);
+        }
 
         switch ($this->getFormat()) {
             case 'csv':
-                $this->data[] = implode($this->getSeparator(), $tempRow);
+                $this->data[] = implode($this->getSeparator(), $tempRow->toArray());
                 break;
             case 'json':
-                $this->data[] = array_combine($this->data[0], $tempRow);
+                $this->data[] = array_combine($this->data[0], $tempRow->toArray());
                 break;
             case 'pdf':
             case 'listData':
             case 'render':
-                $this->data[] = $tempRow;
+                $this->data[] = $tempRow->toArray();
                 break;
             case 'xls':
             case 'html':
@@ -524,7 +516,7 @@ class DataExporter
      * @return $this
      * @throws \RuntimeException
      */
-    public function setData($rows)
+    public function setData(&$rows)
     {
         if (empty($this->columns)) {
             throw new \RuntimeException('First use setColumns to set columns to export!');
@@ -532,6 +524,7 @@ class DataExporter
 
         foreach ($rows as $row) {
             $this->addRow($row);
+            unset($row);
         }
 
         //close tags
