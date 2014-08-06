@@ -34,7 +34,7 @@ class DataExporter
     /**
      * @var array
      */
-    protected $hooks = array();
+    protected $hooks = [];
 
     /**
      * @var array
@@ -79,7 +79,7 @@ class DataExporter
      *
      * @throws \Exception
      */
-    public function setOptions($options = array())
+    public function setOptions($options = [])
     {
         $resolver = new OptionsResolver();
         $this->setDefaultOptions($resolver);
@@ -87,7 +87,7 @@ class DataExporter
 
         switch ($this->getFormat()) {
             case 'csv':
-                $this->data = array();
+                $this->data = [];
                 break;
             case 'xls':
                 $this->openXLS();
@@ -113,7 +113,7 @@ class DataExporter
 
     protected function setDefaultOptions(OptionsResolverInterface $resolver)
     {
-        $resolver->setDefaults(array(
+        $resolver->setDefaults([
                 'format' => 'csv',
                 'charset'=> 'utf-8',
                 'fileName' => function (Options $options) {
@@ -153,34 +153,34 @@ class DataExporter
 
                         return null;
                     },
-                'template_vars' => array(),
+                'template_vars' => [],
                 'pdfOptions' => function (Options $options) {
                         if ('pdf' === $options['format']) {
-                            return array(
+                            return [
                                 'orientation' => 'Landscape'
-                            );
+                            ];
                         }
 
                         return null;
                     }
-            ));
-        $resolver->setAllowedValues(array(
-                'format' => array('csv', 'xls', 'html', 'xml', 'json', 'pdf', 'listData', 'render')
-            ));
-        $resolver->setAllowedTypes(array(
+            ]);
+        $resolver->setAllowedValues([
+                'format' => ['csv', 'xls', 'html', 'xml', 'json', 'pdf', 'listData', 'render']
+            ]);
+        $resolver->setAllowedTypes([
                 'charset' => 'string',
                 'fileName' => 'string',
-                'memory' => array('null', 'bool'),
-                'skipHeader' => array('null', 'bool'),
-                'separator' => array('null', 'string'),
-                'escape' => array('null', 'string'),
+                'memory' => ['null', 'bool'],
+                'skipHeader' => ['null', 'bool'],
+                'separator' => ['null', 'string'],
+                'escape' => ['null', 'string'],
                 'allowNull' => 'bool',
                 'nullReplace' => 'bool',
-                'template' => array('null', 'string'),
+                'template' => ['null', 'string'],
                 'template_vars' => 'array',
-                'pdfOptions' => array('null', 'array'),
-                'onlyContent' => array('null', 'bool')
-            ));
+                'pdfOptions' => ['null', 'array'],
+                'onlyContent' => ['null', 'bool']
+            ]);
     }
 
     /**
@@ -394,7 +394,7 @@ class DataExporter
             }
         }
         //strip html tags
-        if (in_array($this->getFormat(), array('csv', 'xls'))) {
+        if (in_array($this->getFormat(), ['csv', 'xls'])) {
             $data = strip_tags($data);
         }
 
@@ -443,7 +443,7 @@ class DataExporter
                 ));
             }
 
-            $this->hooks[$column] = array($function[0], $function[1]);
+            $this->hooks[$column] = [$function[0], $function[1]];
         }
 
         return $this;
@@ -562,7 +562,7 @@ class DataExporter
      *
      * @return mixed
      */
-    private function getLastKeyFromArray(Array $haystack)
+    private function getLastKeyFromArray(array $haystack)
     {
         end($haystack);
 
@@ -574,7 +574,7 @@ class DataExporter
      *
      * @return mixed
      */
-    private function getFirstKeyFromArray(Array $haystack)
+    private function getFirstKeyFromArray(array $haystack)
     {
         reset($haystack);
 
@@ -596,7 +596,7 @@ class DataExporter
             $this->columns[] = $key;
         }
 
-        if (in_array($this->getFormat(), array('csv', 'json', 'xls'))) {
+        if (in_array($this->getFormat(), ['csv', 'json', 'xls'])) {
             $column = strip_tags($column);
         }
 
@@ -612,7 +612,7 @@ class DataExporter
             } else {
                 $this->data[] = $column . $this->getSeparator();
             }
-        } elseif (true === in_array($this->getFormat(), array('xls', 'html'))) {
+        } elseif (true === in_array($this->getFormat(), ['xls', 'html'])) {
             //first item
             if ($key === $this->getFirstKeyFromArray($columns)) {
                 $this->data .= '<tr>';
@@ -699,11 +699,11 @@ class DataExporter
                 $response->headers->set('Content-Type', 'application/pdf');
                 $response->setContent(
                     $this->knpSnappyPdf->getOutputFromHtml(
-                        $this->templating->render($this->getTemplate(), array(
+                        $this->templating->render($this->getTemplate(), [
                                 'columns'  => $columns,
                                 'data' => $this->data,
                                 'template_vars' => $this->getTemplateVars()
-                            )),
+                            ]),
                         $this->getPdfOptions()
                     )
                 );
@@ -713,18 +713,18 @@ class DataExporter
                 unset($this->data[0]);
                 $response->headers->set('Content-Type', 'text/plain');
                 $response->setContent(
-                    $this->templating->render($this->getTemplate(), array(
+                    $this->templating->render($this->getTemplate(), [
                             'columns'  => $columns,
                             'data' => $this->data,
                             'template_vars' => $this->getTemplateVars()
-                        ))
+                        ])
                 );
                 break;
             case 'listData':
                 $columns = $this->data[0];
                 unset($this->data[0]);
 
-                return array('columns' => $columns, 'rows' => $this->data);
+                return ['columns' => $columns, 'rows' => $this->data];
         }
 
         if ($this->getInMemory()) {

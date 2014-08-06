@@ -10,12 +10,12 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testCSVExport()
     {
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
-        $exporter->setOptions(array('fileName' => 'file', 'separator' => ';'));
-        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
-        $data = array(
-            array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
-            array('col1' => '2a', 'col2' => '2b'),
-        );
+        $exporter->setOptions(['fileName' => 'file', 'separator' => ';']);
+        $exporter->setColumns(['[col1]', '[col2]', '[col3]']);
+        $data = [
+            ['col1' => '1a', 'col2' => '1b', 'col3' => '1c'],
+            ['col1' => '2a', 'col2' => '2b'],
+        ];
 
         $exporter->setData($data);
 
@@ -27,12 +27,12 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testXLSExport()
     {
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
-        $exporter->setOptions(array('format' => 'xls', 'fileName' => 'file'));
-        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
-        $data = array(
-            array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
-            array('col1' => '2a', 'col2' => '2b'),
-        );
+        $exporter->setOptions(['format' => 'xls', 'fileName' => 'file']);
+        $exporter->setColumns(['[col1]', '[col2]', '[col3]']);
+        $data = [
+            ['col1' => '1a', 'col2' => '1b', 'col3' => '1c'],
+            ['col1' => '2a', 'col2' => '2b'],
+        ];
         $exporter->setData($data);
 
         $result = '<!DOCTYPE ><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta name="ProgId" content="Excel.Sheet"><meta name="Generator" content="https://github.com/piotrantosik/DataExporter"></head><body><table><tr><td>[col1]</td><td>[col2]</td><td>[col3]</td></tr><tr><td>1a</td><td>1b</td><td>1c</td></tr><tr><td>2a</td><td>2b</td><td></td></tr></table></body></html>';
@@ -43,11 +43,11 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testCSVExportFromObject()
     {
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
-        $exporter->setOptions(array('format' => 'csv', 'fileName' => 'file', 'separator' => ';'));
+        $exporter->setOptions(['format' => 'csv', 'fileName' => 'file', 'separator' => ';']);
         $testObject = new TestObject();
 
-        $exporter->setColumns(array('col1' => 'Label1', 'col2' => 'Label2'));
-        $data = array($testObject);
+        $exporter->setColumns(['col1' => 'Label1', 'col2' => 'Label2']);
+        $data = [$testObject];
         $exporter->setData($data);
 
         $result = "Label1;Label2\n1a;1b";
@@ -58,11 +58,11 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testXLSExportFromObject()
     {
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
-        $exporter->setOptions(array('format' => 'xls', 'fileName' => 'file'));
+        $exporter->setOptions(['format' => 'xls', 'fileName' => 'file']);
         $testObject = new TestObject();
 
-        $exporter->setColumns(array('col1' => 'Label1', 'col2' => 'Label2', 'col3.col1' => 'From object two'));
-        $data = array($testObject);
+        $exporter->setColumns(['col1' => 'Label1', 'col2' => 'Label2', 'col3.col1' => 'From object two']);
+        $data = [$testObject];
         $exporter->setData($data);
 
         $result = '<!DOCTYPE ><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta name="ProgId" content="Excel.Sheet"><meta name="Generator" content="https://github.com/piotrantosik/DataExporter"></head><body><table><tr><td>Label1</td><td>Label2</td><td>From object two</td></tr><tr><td>1a</td><td>1b</td><td>Object two</td></tr></table></body></html>';
@@ -73,12 +73,12 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testHTMLExport()
     {
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
-        $exporter->setOptions(array('format' => 'html', 'fileName' => 'file'));
-        $exporter->setColumns(array('[col1]' => 'Column 1', '[col2]' => 'Column 2', '[col3]' => 'Column 3'));
-        $data = array(
-            array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
-            array('col1' => '2a', 'col2' => '2b'),
-        );
+        $exporter->setOptions(['format' => 'html', 'fileName' => 'file']);
+        $exporter->setColumns(['[col1]' => 'Column 1', '[col2]' => 'Column 2', '[col3]' => 'Column 3']);
+        $data = [
+            ['col1' => '1a', 'col2' => '1b', 'col3' => '1c'],
+            ['col1' => '2a', 'col2' => '2b'],
+        ];
         $exporter->setData($data);
 
         $result = '<!DOCTYPE ><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta name="Generator" content="https://github.com/piotrantosik/DataExporter"></head><body><table><tr><td>Column 1</td><td>Column 2</td><td>Column 3</td></tr><tr><td>1a</td><td>1b</td><td>1c</td></tr><tr><td>2a</td><td>2b</td><td></td></tr></table></body></html>';
@@ -89,12 +89,12 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testXMLExport()
     {
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
-        $exporter->setOptions(array('format' => 'xml', 'fileName' => 'file', 'charset' => 'ISO-8859-2'));
-        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
-        $data = array(
-            array('col1' => '<test>1a</test>', 'col2' => '"1b"', 'col3' => '< 1c'),
-            array('col1' => '\'2a\'', 'col2' => '> & "2b"'),
-        );
+        $exporter->setOptions(['format' => 'xml', 'fileName' => 'file', 'charset' => 'ISO-8859-2']);
+        $exporter->setColumns(['[col1]', '[col2]', '[col3]']);
+        $data = [
+            ['col1' => '<test>1a</test>', 'col2' => '"1b"', 'col3' => '< 1c'],
+            ['col1' => '\'2a\'', 'col2' => '> & "2b"'],
+        ];
         $exporter->setData($data);
 
         $result_5_4 = '<?xml version="1.0" encoding="ISO-8859-2"?><table><row><column name="[col1]">&lt;test&gt;1a&lt;/test&gt;</column><column name="[col2]">"1b"</column><column name="[col3]">&lt; 1c</column></row><row><column name="[col1]">\'2a\'</column><column name="[col2]">&gt; &amp; "2b"</column><column name="[col3]"></column></row></table>';
@@ -110,12 +110,12 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testJSONExport()
     {
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
-        $exporter->setOptions(array('format' => 'json', 'fileName' => 'file'));
-        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
-        $data = array(
-            array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
-            array('col1' => '2a', 'col2' => '2b'),
-        );
+        $exporter->setOptions(['format' => 'json', 'fileName' => 'file']);
+        $exporter->setColumns(['[col1]', '[col2]', '[col3]']);
+        $data = [
+            ['col1' => '1a', 'col2' => '1b', 'col3' => '1c'],
+            ['col1' => '2a', 'col2' => '2b'],
+        ];
         $exporter->setData($data);
 
         $result = '{"1":{"[col1]":"1a","[col2]":"1b","[col3]":"1c"},"2":{"[col1]":"2a","[col2]":"2b","[col3]":""}}';
@@ -126,12 +126,12 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testJSONMemoryEscapeExport()
     {
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
-        $exporter->setOptions(array('format' => 'json', 'memory' => true));
-        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
-        $data = array(
-            array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
-            array('col1' => '2a', 'col2' => '2b'),
-        );
+        $exporter->setOptions(['format' => 'json', 'memory' => true]);
+        $exporter->setColumns(['[col1]', '[col2]', '[col3]']);
+        $data = [
+            ['col1' => '1a', 'col2' => '1b', 'col3' => '1c'],
+            ['col1' => '2a', 'col2' => '2b'],
+        ];
         $exporter->setData($data);
 
         $result = '{"1":{"[col1]":"1a","[col2]":"1b","[col3]":"1c"},"2":{"[col1]":"2a","[col2]":"2b","[col3]":""}}';
@@ -143,14 +143,14 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testHookExport()
     {
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
-        $exporter->setOptions(array('format' => 'json', 'fileName' => 'file'));
-        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
-        $exporter->addHook(array('AntQa\Bundle\DataExporterBundle\Test\Service\DataExporterTest', 'hookTest'), '[col1]');
-        $exporter->addHook(array(&$this, 'hookTest2'), '[col3]');
-        $data = array(
-            array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
-            array('col1' => '2a', 'col2' => '2b'),
-        );
+        $exporter->setOptions(['format' => 'json', 'fileName' => 'file']);
+        $exporter->setColumns(['[col1]', '[col2]', '[col3]']);
+        $exporter->addHook(['AntQa\Bundle\DataExporterBundle\Test\Service\DataExporterTest', 'hookTest'], '[col1]');
+        $exporter->addHook([&$this, 'hookTest2'], '[col3]');
+        $data = [
+            ['col1' => '1a', 'col2' => '1b', 'col3' => '1c'],
+            ['col1' => '2a', 'col2' => '2b'],
+        ];
         $exporter->setData($data);
 
         $result = '{"1":{"[col1]":"1aHooked","[col2]":"1b","[col3]":"1cHooked2"},"2":{"[col1]":"2aHooked","[col2]":"2b","[col3]":"Hooked2"}}';
@@ -161,20 +161,20 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testHookClosureExport()
     {
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
-        $exporter->setOptions(array('format' => 'json', 'fileName' => 'file'));
-        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
+        $exporter->setOptions(['format' => 'json', 'fileName' => 'file']);
+        $exporter->setColumns(['[col1]', '[col2]', '[col3]']);
 
         $f = function ($parm) {
             return $parm . 'Hooked2';
         };
 
-        $exporter->addHook(array(&$this, 'hookTest'), '[col1]');
+        $exporter->addHook([&$this, 'hookTest'], '[col1]');
         $exporter->addHook($f, '[col3]');
 
-        $data = array(
-            array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
-            array('col1' => '2a', 'col2' => '2b'),
-        );
+        $data = [
+            ['col1' => '1a', 'col2' => '1b', 'col3' => '1c'],
+            ['col1' => '2a', 'col2' => '2b'],
+        ];
         $exporter->setData($data);
 
         $result = '{"1":{"[col1]":"1aHooked","[col2]":"1b","[col3]":"1cHooked2"},"2":{"[col1]":"2aHooked","[col2]":"2b","[col3]":"Hooked2"}}';
@@ -185,12 +185,12 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testCSVExportSkipHeader()
     {
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
-        $exporter->setOptions(array('fileName' => 'file', 'separator' => ';', 'skipHeader' => true));
-        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
-        $data = array(
-            array('col1' => '1a', 'col2' => '1b', 'col3' => '1c'),
-            array('col1' => '2a', 'col2' => '2b'),
-        );
+        $exporter->setOptions(['fileName' => 'file', 'separator' => ';', 'skipHeader' => true]);
+        $exporter->setColumns(['[col1]', '[col2]', '[col3]']);
+        $data = [
+            ['col1' => '1a', 'col2' => '1b', 'col3' => '1c'],
+            ['col1' => '2a', 'col2' => '2b'],
+        ];
         $exporter->setData($data);
 
         $result = "1a;1b;1c\n2a;2b;";
@@ -204,7 +204,7 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testExportSkipHeaderException()
     {
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
-        $exporter->setOptions(array('format' => 'html', 'fileName' => 'file', 'separator' => ';', 'skipHeader' => true));
+        $exporter->setOptions(['format' => 'html', 'fileName' => 'file', 'separator' => ';', 'skipHeader' => true]);
     }
 
     public function hookTest($data)
@@ -223,9 +223,9 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testHookNonParameter()
     {
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
-        $exporter->setOptions(array('format' => 'json', 'fileName' => 'file'));
-        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
-        $exporter->addHook(array('AntQa\Bundle\DataExporterBundle\Test\Service\DataExporterTest'), '[col1]');
+        $exporter->setOptions(['format' => 'json', 'fileName' => 'file']);
+        $exporter->setColumns(['[col1]', '[col2]', '[col3]']);
+        $exporter->addHook(['AntQa\Bundle\DataExporterBundle\Test\Service\DataExporterTest'], '[col1]');
     }
 
     /**
@@ -234,8 +234,8 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
     public function testHookNonFunctionExist()
     {
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
-        $exporter->setOptions(array('format' => 'json', 'fileName' => 'file'));
-        $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
-        $exporter->addHook(array('AntQa\Bundle\DataExporterBundle\Test\Service\DataExporterTest', 'hookTestNon'), '[col1]');
+        $exporter->setOptions(['format' => 'json', 'fileName' => 'file']);
+        $exporter->setColumns(['[col1]', '[col2]', '[col3]']);
+        $exporter->addHook(['AntQa\Bundle\DataExporterBundle\Test\Service\DataExporterTest', 'hookTestNon'], '[col1]');
     }
 }
