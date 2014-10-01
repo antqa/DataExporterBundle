@@ -22,7 +22,7 @@ public function registerBundles()
 {
     $bundles = array(
         // ...
-        new AntQa\DataExporterBundle\AntQaDataExporterBundle(),
+        new AntQa\Bundle\DataExporterBundle\AntQaDataExporterBundle(),
     );
 }
 ```
