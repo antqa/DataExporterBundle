@@ -2,8 +2,6 @@
 
 namespace AntQa\Bundle\DataExporterBundle\Tests;
 
-use AntQa\Bundle\DataExporterBundle\Tests\TestObject2;
-
 class TestObject
 {
     private $col1;

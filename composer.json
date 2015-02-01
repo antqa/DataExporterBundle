@@ -8,12 +8,12 @@
     "authors": [
         {
             "name": "Piotr Antosik",
-            "email": "mail@piotrantosik.com",
-            "homepage": "http://piotrantosik.com",
+            "email": "piotr@ant.qa",
+            "homepage": "http://ant.qa",
             "role": "Developer"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "require": {
         "php": ">=5.3.3",
         "symfony/framework-bundle": "~2.1",
@@ -23,7 +23,8 @@
         "symfony/templating": "~2.1"
     },
     "require-dev": {
-        "symfony/yaml": "~2.1"
+        "symfony/yaml": "~2.1",
+        "knplabs/knp-snappy-bundle": "*"
     },
     "suggest": {
         "knplabs/knp-snappy-bundle": "To use PDF export",

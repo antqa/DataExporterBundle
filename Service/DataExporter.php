@@ -17,7 +17,6 @@ use Symfony\Component\Templating\EngineInterface;
  * @author  Piotr Antosik <mail@piotrantosik.com>
  * @version Release: 0.5
  *
- * TODO: /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/ jako kluczi  przechodzi 2014-02-14
  */
 class DataExporter
 {
@@ -424,17 +423,6 @@ class DataExporter
             if (2 !== count($function)) {
                 throw new \LengthException('Exactly two parameters required!');
             }
-
-            /*
-             * bug: use addHook before setColumns
-            if (false === in_array($column, $this->columns)) {
-                throw new \InvalidArgumentException(sprintf(
-                    "Parameter column must be defined in setColumns function!\nRecived: %s\n Expected one of: %s",
-                    $function[1],
-                    implode(', ', $this->columns)
-                ));
-            }
-            */
             if (false === is_callable($function)) {
                 throw new \BadFunctionCallException(sprintf(
                     'Function %s in class %s is non callable!',
