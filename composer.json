@@ -1,42 +1,45 @@
 {
-    "name": "piotrantosik/dataexporter-bundle",
+    "name": "antqa/dataexporter-bundle",
     "type": "symfony-bundle",
     "description": "Easy export data to CSV, XML, HTML, JSON or XLS",
-    "keywords": ["exporter","csv","xls", "xml", "json"],
-    "homepage": "http://github.com/piotrantosik/AntQaAjaxAutoCompleteBundle",
+    "keywords": ["exporter", "csv", "xls", "xml", "json"],
+    "homepage": "http://github.com/antqa/DataExporterBundle",
     "license": "MIT",
     "authors": [
         {
             "name": "Piotr Antosik",
             "email": "piotr@ant.qa",
-            "homepage": "http://ant.qa",
+            "homepage": "https://www.ant.qa",
             "role": "Developer"
+        },
+        {
+            "name": "Community",
+            "homepage": "https://github.com/antqa/DataExporterBundle/contributors"
         }
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": ">=5.3.3",
-        "symfony/framework-bundle": "~2.1",
-        "symfony/http-foundation": "~2.1",
-        "symfony/property-access": "~2.1",
-        "symfony/options-resolver": "~2.1",
-        "symfony/templating": "~2.1"
+        "php": ">=5.5.9",
+        "symfony/framework-bundle": "~2.3",
+        "symfony/http-foundation": "~2.3",
+        "symfony/property-access": "~2.3",
+        "symfony/options-resolver": "~2.3"
     },
     "require-dev": {
-        "symfony/yaml": "~2.1",
-        "knplabs/knp-snappy-bundle": "*"
+        "symfony/yaml": "~2.3",
+        "knplabs/knp-snappy-bundle": "*",
+        "symfony/templating": "~2.3"
     },
     "suggest": {
         "knplabs/knp-snappy-bundle": "To use PDF export",
-        "symfony/templating": "To PDF and render export"
+        "symfony/templating": "To use HTML export"
     },
     "autoload": {
-        "psr-0": { "AntQa\\Bundle\\DataExporterBundle": "" }
+        "psr-4": { "AntQa\\DataExporterBundle\\": "" }
     },
-    "target-dir": "AntQa/Bundle/DataExporterBundle",
     "extra": {
         "branch-alias": {
-            "dev-master": "0.5.x-dev"
+            "dev-master": "0.6.x-dev"
         }
     }
 }

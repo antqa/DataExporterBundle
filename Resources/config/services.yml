@@ -1,5 +1,5 @@
 parameters:
-    antqa.dataexporter.class: AntQa\Bundle\DataExporterBundle\Service\DataExporter
+    antqa.dataexporter.class: AntQa\DataExporterBundle\DataExporter
 
 services:
     antqa.dataexporter:

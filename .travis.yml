@@ -7,10 +7,30 @@ php:
   - hhvm-nightly
 
 matrix:
-    allow_failures:
-        - php: hhvm-nightly
+  fast_finish: true
+  include:
+    - php: 5.6
+      env: SYMFONY_VERSION=2.3.*
+    - php: 5.6
+      env: SYMFONY_VERSION=3.0.*
+  allow_failures:
+  - php: hhvm
+
+cache:
+  directories:
+  - "$HOME/.composer/cache"
 
 before_script:
-    - COMPOSER_ROOT_VERSION=dev-master composer --prefer-source --dev install
+  - COMPOSER_ROOT_VERSION=dev-master composer --prefer-source --dev install
+script:
+  - phpunit --coverage-text
 
-script: phpunit --coverage-text
+before_install:
+  - composer selfupdate
+  - if [ "$SYMFONY_VERSION" != "" ]; then composer require "symfony/symfony:${SYMFONY_VERSION}" --no-update; fi;
+
+install: composer update --prefer-dist --no-interaction $COMPOSER_FLAGS
+
+notifications:
+  slack:
+    secure: J7un+5jupQ/TsR9IjKEvIT5fnPvGr9CRtp08q8CHjiI6WugGIzkjh9KhuXOy8d+6n/kjL9LpifdnH0BXLJKx/lL+78TPNFQgrwLSvzSfPPRNPEV1vSboaEnLK8YvgsuGBxfB/OKAIhaQ8o19ScUlgjiR3O4GlmaXwSJ82E8AFM4=

@@ -1,6 +1,15 @@
 <?php
 
-namespace AntQa\Bundle\DataExporterBundle\Service;
+/*
+ * This file is part of the AntQaDataExporterBundle package.
+ *
+ * (c) ant.qa <https://www.ant.qa/>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace AntQa\DataExporterBundle;
 
 use Knp\Bundle\SnappyBundle\Snappy\LoggableGenerator;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,9 +23,7 @@ use Symfony\Component\Templating\EngineInterface;
 /**
  * DataExporter
  *
- * @author  Piotr Antosik <mail@piotrantosik.com>
- * @version Release: 0.5
- *
+ * @author Piotr Antosik <piotr@piotrantosik.com>
  */
 class DataExporter
 {

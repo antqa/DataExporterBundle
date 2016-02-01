@@ -1,9 +1,17 @@
 <?php
 
-namespace AntQa\Bundle\DataExporterBundle\Test\Service;
+/*
+ * This file is part of the AntQaDataExporterBundle package.
+ *
+ * (c) ant.qa <https://www.ant.qa/>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-use AntQa\Bundle\DataExporterBundle\Service\DataExporter;
-use AntQa\Bundle\DataExporterBundle\Tests\TestObject;
+namespace AntQa\DataExporterBundle\Tests;
+
+use AntQa\DataExporterBundle\DataExporter;
 
 class DataExporterTest extends \PHPUnit_Framework_TestCase
 {
@@ -139,13 +147,12 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($result, $exporter->render());
     }
 
-
     public function testHookExport()
     {
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
         $exporter->setOptions(['format' => 'json', 'fileName' => 'file']);
         $exporter->setColumns(['[col1]', '[col2]', '[col3]']);
-        $exporter->addHook(['AntQa\Bundle\DataExporterBundle\Test\Service\DataExporterTest', 'hookTest'], '[col1]');
+        $exporter->addHook(['AntQa\DataExporterBundle\Tests\DataExporterTest', 'hookTest'], '[col1]');
         $exporter->addHook([&$this, 'hookTest2'], '[col3]');
         $data = [
             ['col1' => '1a', 'col2' => '1b', 'col3' => '1c'],
@@ -225,7 +232,7 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
         $exporter->setOptions(['format' => 'json', 'fileName' => 'file']);
         $exporter->setColumns(['[col1]', '[col2]', '[col3]']);
-        $exporter->addHook(['AntQa\Bundle\DataExporterBundle\Test\Service\DataExporterTest'], '[col1]');
+        $exporter->addHook(['AntQa\Bundle\DataExporterBundle\Tests\DataExporterTest'], '[col1]');
     }
 
     /**
@@ -236,6 +243,6 @@ class DataExporterTest extends \PHPUnit_Framework_TestCase
         $exporter = new DataExporter([], $this->getMock('Symfony\Component\Templating\EngineInterface'));
         $exporter->setOptions(['format' => 'json', 'fileName' => 'file']);
         $exporter->setColumns(['[col1]', '[col2]', '[col3]']);
-        $exporter->addHook(['AntQa\Bundle\DataExporterBundle\Test\Service\DataExporterTest', 'hookTestNon'], '[col1]');
+        $exporter->addHook(['AntQa\Bundle\DataExporterBundle\Tests\DataExporterTest', 'hookTestNon'], '[col1]');
     }
 }
