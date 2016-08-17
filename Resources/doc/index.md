@@ -1,10 +1,7 @@
 AntQaDataExporterBundle
 -------------
 
-[![Build Status](https://api.travis-ci.org/piotrantosik/DataExporter.png?branch=master)](http://travis-ci.org/piotrantosik/DataExporter)
-
-## BC Break from 1.0
-- skip_header and memory options must be a boolean
+[![Build Status](https://api.travis-ci.org/antqa/DataExporterBundle.png?branch=master)](http://travis-ci.org/antqa/DataExporterBundle)
 
 ## Installation
 
@@ -12,7 +9,7 @@ AntQaDataExporterBundle
 ```js
 {
     "require": {
-        "piotrantosik/dataexporter-bundle": "*"
+        "antqa/dataexporter-bundle": "*"
     }
 }
 ```
@@ -22,7 +19,7 @@ public function registerBundles()
 {
     $bundles = array(
         // ...
-        new AntQa\Bundle\DataExporterBundle\AntQaDataExporterBundle(),
+        new AntQa\DataExporterBundle\AntQaDataExporterBundle(),
     );
 }
 ```
@@ -61,7 +58,7 @@ Our exporter support this! Just use the function addHook.
 addHook expected two or one parameters.
  - first parameter is a function (object) that we want use, second is a column name, eg.:
 ```php
-$exporter->addHook(array('EE\DataExporterBundle\Test\Service\DataExporterTest', 'hookTest'), '[col1]');
+$exporter->addHook(array('AntQa\DataExporterBundle\Tests\DataExporterTest', 'hookTest'), '[col1]');
 $exporter->addHook(array(&$this, 'hookTest2'), '[col3]');
 ```
 
@@ -87,7 +84,7 @@ It is possible to set multiple hooks on multiple columns, but only one for each 
 ### Usage example from array:
 
 ```php
-$exporter = $this->get('ee.dataexporter');
+$exporter = $this->get('antqa.dataexporter');
 $exporter->setOptions('csv', array('fileName' => 'file', 'separator' => ';'));
 $exporter->setColumns(array('[col1]', '[col2]', '[col3]'));
 $exporter->setData(array(
@@ -101,7 +98,7 @@ return $exporter->render();
 ### And from object:
 
 ```php
-$exporter = $this->get('ee.dataexporter');
+$exporter = $this->get('antqa.dataexporter');
 $testObject = new TestObject();
 
 $exporter->setOptions('xls', array('fileName' => 'file'));

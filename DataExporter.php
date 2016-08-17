@@ -23,7 +23,7 @@ use Symfony\Component\Templating\EngineInterface;
 /**
  * DataExporter
  *
- * @author Piotr Antosik <piotr@piotrantosik.com>
+ * @author Piotr Antosik <piotr@ant.qa>
  */
 class DataExporter
 {
@@ -68,16 +68,20 @@ class DataExporter
     private $propertyAccessor;
 
     /**
-     * @param array                  $registredBundles
      * @param EngineInterface        $templating
+     */
+    public function __construct(EngineInterface $templating)
+    {
+        $this->templating = $templating;
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
+    }
+
+    /**
      * @param LoggableGenerator|null $knpSnappyPdf
      */
-    public function __construct($registredBundles, EngineInterface $templating, LoggableGenerator $knpSnappyPdf = null)
+    public function setSnappy(LoggableGenerator $knpSnappyPdf = null)
     {
-        $this->registredBundles = $registredBundles;
-        $this->templating = $templating;
         $this->knpSnappyPdf = $knpSnappyPdf;
-        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
 
     /**
@@ -88,7 +92,13 @@ class DataExporter
     public function setOptions($options = [])
     {
         $resolver = new OptionsResolver();
-        $this->setDefaultOptions($resolver);
+
+        if (class_exists('Symfony\Component\OptionsResolver\OptionsResolverInterface')) {
+            $this->setDefaultOptions($resolver);
+        } else {
+            $this->configureOptions($resolver);
+        }
+
         $this->options = $resolver->resolve($options);
 
         switch ($this->getFormat()) {
@@ -105,7 +115,7 @@ class DataExporter
                 $this->openXML();
                 break;
             case 'pdf':
-                if (false === isset($this->registredBundles['KnpSnappyBundle'])) {
+                if (null === $this->knpSnappyPdf) {
                     throw new \Exception('KnpSnappyBundle must be installed');
                 }
 
@@ -117,7 +127,20 @@ class DataExporter
         }
     }
 
+    /**
+     * BC for SF < 2.7
+     *
+     * @param OptionsResolverInterface $resolver
+     */
     protected function setDefaultOptions(OptionsResolverInterface $resolver)
+    {
+        $this->configureOptions($resolver);
+    }
+
+    /**
+     * @param OptionsResolver $resolver
+     */
+    protected function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
                 'format' => 'csv',
@@ -170,23 +193,20 @@ class DataExporter
                         return null;
                     }
             ]);
-        $resolver->setAllowedValues([
-                'format' => ['csv', 'xls', 'html', 'xml', 'json', 'pdf', 'listData', 'render']
-            ]);
-        $resolver->setAllowedTypes([
-                'charset' => 'string',
-                'fileName' => 'string',
-                'memory' => ['null', 'bool'],
-                'skipHeader' => ['null', 'bool'],
-                'separator' => ['null', 'string'],
-                'escape' => ['null', 'string'],
-                'allowNull' => 'bool',
-                'nullReplace' => 'bool',
-                'template' => ['null', 'string'],
-                'template_vars' => 'array',
-                'pdfOptions' => ['null', 'array'],
-                'onlyContent' => ['null', 'bool']
-            ]);
+        $resolver->setAllowedValues('format', ['csv', 'xls', 'html', 'xml', 'json', 'pdf', 'listData', 'render']);
+        $resolver
+            ->addAllowedTypes('charset', 'string')
+            ->addAllowedTypes('fileName', 'string')
+            ->addAllowedTypes('memory', ['null', 'bool'])
+            ->addAllowedTypes('skipHeader', ['null', 'bool'])
+            ->addAllowedTypes('separator', ['null', 'string'])
+            ->addAllowedTypes('escape', ['null', 'string'])
+            ->addAllowedTypes('allowNull', 'bool')
+            ->addAllowedTypes('nullReplace', 'bool')
+            ->addAllowedTypes('template', ['null', 'string'])
+            ->addAllowedTypes('template_vars', 'array')
+            ->addAllowedTypes('pdfOptions', ['null', 'array'])
+            ->addAllowedTypes('onlyContent', ['null', 'bool']);
     }
 
     /**
@@ -373,12 +393,16 @@ class DataExporter
                 $refl = new \ReflectionMethod($hooks[$column][0], $hooks[$column][1]);
                 if (is_object($hooks[$column][0])) {
                     $obj = $hooks[$column][0];
-                    $data = $obj->$hooks[$column][1]($data);
+                    $method = $hooks[$column][1];
+                    $data = $obj->$method($data);
                 } elseif ($refl->isStatic()) {
                     $data = $hooks[$column][0]::$hooks[$column][1]($data);
                 } else {
-                    $obj = new $hooks[$column][0];
-                    $data = $obj->$hooks[$column][1]($data);
+                    $object = $hooks[$column][0];
+                    $obj = new $object;
+
+                    $method = $hooks[$column][1];
+                    $data = $obj->$method($data);
                 }
             }
         }
@@ -585,13 +609,13 @@ class DataExporter
      */
     private function setColumn($column, $key, $columns)
     {
-        if (true === is_integer($key)) {
+        if (true === is_int($key)) {
             $this->columns[] = $column;
         } else {
             $this->columns[] = $key;
         }
 
-        if (in_array($this->getFormat(), ['csv', 'json', 'xls'])) {
+        if (in_array($this->getFormat(), ['csv', 'json', 'xls'], true)) {
             $column = strip_tags($column);
         }
 
@@ -599,7 +623,7 @@ class DataExporter
             //last item
             if (isset($this->data[0])) {
                 //last item
-                if ($key != $this->getLastKeyFromArray($columns)) {
+                if ($key !== $this->getLastKeyFromArray($columns)) {
                     $this->data[0] = $this->data[0] . $column . $this->getSeparator();
                 } else {
                     $this->data[0] = $this->data[0] . $column;
@@ -607,7 +631,7 @@ class DataExporter
             } else {
                 $this->data[] = $column . $this->getSeparator();
             }
-        } elseif (true === in_array($this->getFormat(), ['xls', 'html'])) {
+        } elseif (true === in_array($this->getFormat(), ['xls', 'html'], true)) {
             //first item
             if ($key === $this->getFirstKeyFromArray($columns)) {
                 $this->data .= '<tr>';
@@ -697,7 +721,7 @@ class DataExporter
                         $this->templating->render($this->getTemplate(), [
                                 'columns'  => $columns,
                                 'data' => $this->data,
-                                'template_vars' => $this->getTemplateVars()
+                                'template_vars' => $this->getTemplateVars(),
                             ]),
                         $this->getPdfOptions()
                     )
@@ -711,7 +735,7 @@ class DataExporter
                     $this->templating->render($this->getTemplate(), [
                             'columns'  => $columns,
                             'data' => $this->data,
-                            'template_vars' => $this->getTemplateVars()
+                            'template_vars' => $this->getTemplateVars(),
                         ])
                 );
                 break;
