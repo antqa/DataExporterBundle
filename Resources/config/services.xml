@@ -9,7 +9,7 @@
     </parameters>
 
     <services>
-        <service id="antqa.dataexporter" class="%antqa.dataexporter.class%" scope="prototype">
+        <service id="antqa.dataexporter" class="%antqa.dataexporter.class%" shared="false">
             <argument type="service" id="templating" />
             <call method="setSnappy">
                 <argument type="service" id="knp_snappy.pdf" on-invalid="null" />
