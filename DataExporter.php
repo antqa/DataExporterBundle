@@ -11,7 +11,7 @@
 
 namespace AntQa\DataExporterBundle;
 
-use Knp\Bundle\SnappyBundle\Snappy\LoggableGenerator;
+use Knp\Snappy\Pdf;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -53,7 +53,7 @@ class DataExporter
     protected $registredBundles;
 
     /**
-     * @var LoggableGenerator|null
+     * @var Pdf|null
      */
     protected $knpSnappyPdf;
 
@@ -77,9 +77,9 @@ class DataExporter
     }
 
     /**
-     * @param LoggableGenerator|null $knpSnappyPdf
+     * @param Pdf|null $knpSnappyPdf
      */
-    public function setSnappy(LoggableGenerator $knpSnappyPdf = null)
+    public function setSnappy(Pdf $knpSnappyPdf = null)
     {
         $this->knpSnappyPdf = $knpSnappyPdf;
     }

@@ -27,7 +27,7 @@
     },
     "require-dev": {
         "symfony/yaml": "^2.7|^3.0",
-        "knplabs/knp-snappy-bundle": "~1.4",
+        "knplabs/knp-snappy-bundle": "^1.5",
         "symfony/templating": "^2.7|^3.0",
         "phpunit/phpunit": "^5.0"
     },
