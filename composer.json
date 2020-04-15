@@ -19,17 +19,17 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": ">=5.6",
-        "symfony/framework-bundle": "^2.7|^3.0|^4.0",
-        "symfony/http-foundation": "^2.7|^3.0|^4.0",
-        "symfony/property-access": "^2.7|^3.0|^4.0",
-        "symfony/options-resolver": "^2.7|^3.0|^4.0",
-        "twig/twig": "^2.0"
+        "php": ">=7.2",
+        "symfony/framework-bundle": "^3.4|^4.4",
+        "symfony/http-foundation": "^3.4|^4.4",
+        "symfony/property-access": "^3.4|^4.4",
+        "symfony/options-resolver": "^3.4|^4.4",
+        "twig/twig": "^2.7"
     },
     "require-dev": {
-        "symfony/yaml": "^2.7|^3.0||^4.0",
+        "symfony/yaml": "^3.4||^4.4",
         "knplabs/knp-snappy-bundle": "^1.5",
-        "symfony/templating": "^2.7|^3.0||^4.0",
+        "symfony/templating": "^3.4||^4.4",
         "phpunit/phpunit": "^5.0",
         "phpoffice/phpspreadsheet": "^1.0"
     },

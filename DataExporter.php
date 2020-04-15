@@ -21,7 +21,6 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Twig\Environment;
-use Symfony\Component\Templating\EngineInterface;
 
 /**
  * DataExporter
