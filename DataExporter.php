@@ -20,7 +20,7 @@ use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Twig\Environment;
 use Symfony\Component\Templating\EngineInterface;
 
 /**
@@ -51,19 +51,14 @@ class DataExporter
     protected $options;
 
     /**
-     * @var array
-     */
-    protected $registredBundles;
-
-    /**
      * @var Pdf|null
      */
     protected $knpSnappyPdf;
 
     /**
-     * @var EngineInterface
+     * @var Environment
      */
-    protected $templating;
+    protected $twig;
 
     /**
      * @var int
@@ -80,12 +75,9 @@ class DataExporter
      */
     private $propertyAccessor;
 
-    /**
-     * @param EngineInterface        $templating
-     */
-    public function __construct(EngineInterface $templating)
+    public function __construct(Environment $twig)
     {
-        $this->templating = $templating;
+        $this->twig = $twig;
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
 
@@ -754,7 +746,7 @@ class DataExporter
                 $response->headers->set('Content-Type', 'application/pdf');
                 $response->setContent(
                     $this->knpSnappyPdf->getOutputFromHtml(
-                        $this->templating->render($this->getTemplate(), [
+                        $this->twig->render($this->getTemplate(), [
                                 'columns'  => $columns,
                                 'data' => $this->data,
                                 'template_vars' => $this->getTemplateVars(),
@@ -768,7 +760,7 @@ class DataExporter
                 unset($this->data[0]);
                 $response->headers->set('Content-Type', 'text/plain');
                 $response->setContent(
-                    $this->templating->render($this->getTemplate(), [
+                    $this->twig->render($this->getTemplate(), [
                             'columns'  => $columns,
                             'data' => $this->data,
                             'template_vars' => $this->getTemplateVars(),

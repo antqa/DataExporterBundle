@@ -23,7 +23,8 @@
         "symfony/framework-bundle": "^2.7|^3.0|^4.0",
         "symfony/http-foundation": "^2.7|^3.0|^4.0",
         "symfony/property-access": "^2.7|^3.0|^4.0",
-        "symfony/options-resolver": "^2.7|^3.0|^4.0"
+        "symfony/options-resolver": "^2.7|^3.0|^4.0",
+        "twig/twig": "^2.0"
     },
     "require-dev": {
         "symfony/yaml": "^2.7|^3.0||^4.0",
@@ -33,8 +34,7 @@
         "phpoffice/phpspreadsheet": "^1.0"
     },
     "suggest": {
-        "knplabs/knp-snappy-bundle": "To use PDF export",
-        "symfony/templating": "To use HTML export"
+        "knplabs/knp-snappy-bundle": "To use PDF export"
     },
     "autoload": {
         "psr-4": { "AntQa\\DataExporterBundle\\": "" }
