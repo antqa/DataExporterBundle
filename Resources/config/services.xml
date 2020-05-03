@@ -9,7 +9,7 @@
     </parameters>
 
     <services>
-        <service id="antqa.dataexporter" class="%antqa.dataexporter.class%" shared="false">
+        <service id="antqa.dataexporter" class="%antqa.dataexporter.class%" shared="false" public="true">
             <argument type="service" id="twig" />
             <call method="setSnappy">
                 <argument type="service" id="knp_snappy.pdf" on-invalid="null" />
