@@ -441,7 +441,7 @@ class DataExporter
             }
         }
         //strip html tags
-        if (in_array($this->getFormat(), ['csv', 'xls', 'xlsx'])) {
+        if (null !== $data && in_array($this->getFormat(), ['csv', 'xls', 'xlsx'])) {
             $data = strip_tags($data);
         }
 
