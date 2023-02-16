@@ -104,6 +104,8 @@ class DataExporter
         }
 
         $this->options = $resolver->resolve($options);
+        $this->data = null;
+        $this->columns = [];
 
         switch ($this->getFormat()) {
             case 'csv':
@@ -422,13 +424,14 @@ class DataExporter
         }
 
         //replace new line character
-        $data = preg_replace("/\r\n|\r|\n/", ' ', $data);
-
-        $data = mb_ereg_replace(
-            sprintf('%s', $this->getSeparator()),
-            sprintf('%s', $this->getEscape()),
-            $data
-        );
+        if (null !== $data) {
+            $data = preg_replace("/\r\n|\r|\n/", ' ', $data);
+            $data = mb_ereg_replace(
+                sprintf('%s', $this->getSeparator()),
+                sprintf('%s', $this->getEscape()),
+                $data
+            );
+        }
 
         if ('xml' === $this->getFormat()) {
             if (version_compare(phpversion(), '5.4.0', '>=')) {
